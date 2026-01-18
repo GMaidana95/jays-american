@@ -1,117 +1,253 @@
 'use client'
 
-import { useState } from 'react'
-import { ZoomIn, ZoomOut, Maximize2 } from 'lucide-react'
+import { useState, useRef, useEffect } from 'react'
+import { Download, X, ZoomIn, ZoomOut } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+} from '@/components/ui/dialog'
+
+const menuImages = [
+  { src: '/menu-food/menu1.png', alt: 'Menú del Restaurante - Página 1' },
+  { src: '/menu-food/menu2.png', alt: 'Menú del Restaurante - Página 2' },
+]
 
 export function MenuViewer() {
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0)
   const [scale, setScale] = useState(1)
-  const [isFullscreen, setIsFullscreen] = useState(false)
+  const [position, setPosition] = useState({ x: 0, y: 0 })
+  const imageContainerRef = useRef<HTMLDivElement>(null)
+  const lastTouchDistance = useRef<number | null>(null)
+  const lastTouchCenter = useRef<{ x: number; y: number } | null>(null)
 
-  const zoomIn = () => {
-    setScale((prev) => Math.min(prev + 0.25, 3))
+  // Reset zoom when modal closes or image changes
+  useEffect(() => {
+    if (!isModalOpen) {
+      setScale(1)
+      setPosition({ x: 0, y: 0 })
+    }
+  }, [isModalOpen, selectedImageIndex])
+
+  const openModal = (index: number) => {
+    setSelectedImageIndex(index)
+    setIsModalOpen(true)
   }
 
+  // Handle touch events for pinch-to-zoom
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (e.touches.length === 2) {
+      const distance = getTouchDistance(e.touches)
+      lastTouchDistance.current = distance
+      lastTouchCenter.current = getTouchCenter(e.touches)
+    }
+  }
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (e.touches.length === 2) {
+      e.preventDefault()
+      const distance = getTouchDistance(e.touches)
+      const center = getTouchCenter(e.touches)
+
+      if (lastTouchDistance.current !== null) {
+        const scaleChange = distance / lastTouchDistance.current
+        setScale((prev) => Math.min(Math.max(prev * scaleChange, 1), 4))
+      }
+
+      if (lastTouchCenter.current !== null && scale > 1) {
+        const deltaX = center.x - lastTouchCenter.current.x
+        const deltaY = center.y - lastTouchCenter.current.y
+        setPosition((prev) => ({
+          x: prev.x + deltaX,
+          y: prev.y + deltaY,
+        }))
+      }
+
+      lastTouchDistance.current = distance
+      lastTouchCenter.current = center
+    }
+  }
+
+  const handleTouchEnd = () => {
+    lastTouchDistance.current = null
+    lastTouchCenter.current = null
+  }
+
+  const getTouchDistance = (touches: React.TouchList) => {
+    return Math.hypot(
+      touches[0].clientX - touches[1].clientX,
+      touches[0].clientY - touches[1].clientY
+    )
+  }
+
+  const getTouchCenter = (touches: React.TouchList) => {
+    return {
+      x: (touches[0].clientX + touches[1].clientX) / 2,
+      y: (touches[0].clientY + touches[1].clientY) / 2,
+    }
+  }
+
+  const zoomIn = () => setScale((prev) => Math.min(prev + 0.5, 4))
   const zoomOut = () => {
-    setScale((prev) => Math.max(prev - 0.25, 0.5))
+    setScale((prev) => {
+      const newScale = Math.max(prev - 0.5, 1)
+      if (newScale === 1) setPosition({ x: 0, y: 0 })
+      return newScale
+    })
   }
 
-  const toggleFullscreen = () => {
-    setIsFullscreen(!isFullscreen)
+  const resetZoom = () => {
+    setScale(1)
+    setPosition({ x: 0, y: 0 })
   }
 
   return (
-    <>
-      <div className="relative bg-muted/30 rounded-lg border-2 border-border overflow-hidden">
-        {/* Zoom Controls */}
-        <div className="absolute top-4 right-4 z-10 flex gap-2 bg-background/95 backdrop-blur-sm rounded-lg p-2 shadow-lg">
+    <div className="w-full">
+      {/* Mobile-First Menu Grid */}
+      <div className="space-y-4">
+        {/* Download PDF Button */}
+        <div className="flex justify-center mb-6">
           <Button
-            size="icon"
-            variant="outline"
-            onClick={zoomOut}
-            disabled={scale <= 0.5}
-            className="h-10 w-10 bg-transparent"
+            asChild
+            size="lg"
+            className="gap-2 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold shadow-lg"
           >
-            <ZoomOut className="h-5 w-5" />
-          </Button>
-          <Button
-            size="icon"
-            variant="outline"
-            onClick={zoomIn}
-            disabled={scale >= 3}
-            className="h-10 w-10"
-          >
-            <ZoomIn className="h-5 w-5" />
-          </Button>
-          <Button
-            size="icon"
-            variant="outline"
-            onClick={toggleFullscreen}
-            className="h-10 w-10 bg-transparent"
-          >
-            <Maximize2 className="h-5 w-5" />
+            <a href="/menu-food/Menu1.pdf" download="Menu-Jays-American.pdf">
+              <Download className="h-5 w-5" />
+              Descargar Menú (PDF)
+            </a>
           </Button>
         </div>
 
-        {/* Menu Image Container */}
-        <div className="overflow-auto max-h-[600px] md:max-h-[800px] p-4">
-          <div 
-            className="transition-transform duration-300 ease-out mx-auto"
-            style={{ 
-              transform: `scale(${scale})`,
-              transformOrigin: 'center top'
-            }}
-          >
-            <img
-              src="/menu-food/menu1.png"
-              alt="Menú del Restaurante"
-              className="w-full max-w-4xl mx-auto rounded-lg shadow-xl"
-            />
-            <img
-              src="/menu-food/menu2.png"
-              alt="Menú del Restaurante 2"
-              className="w-full max-w-4xl mx-auto rounded-lg shadow-xl"
-              onClick={(e) => e.stopPropagation()}
-            />
-          </div>
+        {/* Clickable Menu Images */}
+        <div className="grid gap-4">
+          {menuImages.map((image, index) => (
+            <button
+              key={image.src}
+              onClick={() => openModal(index)}
+              className="relative group cursor-pointer rounded-lg overflow-hidden border-2 border-border hover:border-primary transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+            >
+              <img
+                src={image.src}
+                alt={image.alt}
+                className="w-full h-auto object-contain"
+              />
+              {/* Overlay hint on hover/focus */}
+              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 group-focus:bg-black/30 transition-all duration-300 flex items-center justify-center">
+                <span className="opacity-0 group-hover:opacity-100 group-focus:opacity-100 text-white text-lg font-semibold bg-black/50 px-4 py-2 rounded-lg backdrop-blur-sm transition-opacity duration-300">
+                  Toca para ampliar
+                </span>
+              </div>
+            </button>
+          ))}
         </div>
 
-        {/* Scale Indicator */}
-        <div className="absolute bottom-4 left-4 bg-background/95 backdrop-blur-sm rounded-lg px-4 py-2 text-sm font-medium">
-          {Math.round(scale * 100)}%
-        </div>
+        {/* Hint text for mobile users */}
+        <p className="text-center text-sm text-muted-foreground mt-4">
+          Toca cualquier imagen para verla en pantalla completa
+        </p>
       </div>
 
-      {/* Fullscreen Modal */}
-      {isFullscreen && (
-        <div 
-          className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center p-4"
-          onClick={toggleFullscreen}
+      {/* Fullscreen Modal with Pinch-to-Zoom */}
+      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <DialogContent
+          showCloseButton={false}
+          className="max-w-none w-screen h-screen p-0 border-none bg-black/95 rounded-none"
         >
-          <button
-            className="absolute top-4 right-4 text-white hover:text-white/80 transition-colors"
-            onClick={toggleFullscreen}
+          <DialogTitle className="sr-only">Menú en pantalla completa</DialogTitle>
+          
+          {/* Modal Header with Controls */}
+          <div className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between p-4 bg-gradient-to-b from-black/70 to-transparent">
+            {/* Page indicator */}
+            <div className="text-white text-sm font-medium bg-black/50 px-3 py-1.5 rounded-full backdrop-blur-sm">
+              {selectedImageIndex + 1} / {menuImages.length}
+            </div>
+
+            {/* Zoom controls (desktop) */}
+            <div className="hidden sm:flex items-center gap-2">
+              <Button
+                size="icon"
+                variant="ghost"
+                onClick={zoomOut}
+                disabled={scale <= 1}
+                className="h-10 w-10 text-white hover:bg-white/20 disabled:opacity-50"
+              >
+                <ZoomOut className="h-5 w-5" />
+              </Button>
+              <span className="text-white text-sm min-w-[50px] text-center">
+                {Math.round(scale * 100)}%
+              </span>
+              <Button
+                size="icon"
+                variant="ghost"
+                onClick={zoomIn}
+                disabled={scale >= 4}
+                className="h-10 w-10 text-white hover:bg-white/20 disabled:opacity-50"
+              >
+                <ZoomIn className="h-5 w-5" />
+              </Button>
+            </div>
+
+            {/* Close button */}
+            <Button
+              size="icon"
+              variant="ghost"
+              onClick={() => setIsModalOpen(false)}
+              className="h-10 w-10 text-white hover:bg-white/20"
+            >
+              <X className="h-6 w-6" />
+            </Button>
+          </div>
+
+          {/* Zoomable Image Container */}
+          <div
+            ref={imageContainerRef}
+            className="w-full h-full overflow-hidden flex items-center justify-center touch-none"
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+            onDoubleClick={scale > 1 ? resetZoom : zoomIn}
           >
-            <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-          <div className="overflow-auto max-h-full max-w-full">
             <img
-              src="/menu-food/menu1.png"
-              alt="Menú del Restaurante"
-              className="max-w-full max-h-[90vh] object-contain"
-              onClick={(e) => e.stopPropagation()}
-            />
-            <img
-              src="/menu-food/menu2.png"
-              alt="Menú del Restaurante 2"
-              className="max-w-full max-h-[90vh] object-contain"
-              onClick={(e) => e.stopPropagation()}
+              src={menuImages[selectedImageIndex].src}
+              alt={menuImages[selectedImageIndex].alt}
+              className="max-w-full max-h-full object-contain select-none transition-transform duration-100"
+              style={{
+                transform: `scale(${scale}) translate(${position.x / scale}px, ${position.y / scale}px)`,
+              }}
+              draggable={false}
             />
           </div>
-        </div>
-      )}
-    </>
+
+          {/* Navigation dots for multiple pages */}
+          {menuImages.length > 1 && (
+            <div className="absolute bottom-6 left-0 right-0 flex justify-center gap-2 z-20">
+              {menuImages.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => {
+                    setSelectedImageIndex(index)
+                    resetZoom()
+                  }}
+                  className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                    index === selectedImageIndex
+                      ? 'bg-white scale-110'
+                      : 'bg-white/50 hover:bg-white/75'
+                  }`}
+                  aria-label={`Ver página ${index + 1}`}
+                />
+              ))}
+            </div>
+          )}
+
+          {/* Mobile zoom hint */}
+          <div className="absolute bottom-16 left-0 right-0 text-center text-white/60 text-xs sm:hidden">
+            Pellizca para hacer zoom • Doble toque para restablecer
+          </div>
+        </DialogContent>
+      </Dialog>
+    </div>
   )
 }
