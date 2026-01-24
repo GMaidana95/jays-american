@@ -30,11 +30,11 @@ export default function HomePage() {
               Auténtico sabor americano en Buenos Aires
             </p>
             <div className="flex flex-col sm:flex-row gap-4 opacity-0 animate-fade-in-up">
-              <Button size="lg" className="bg-primary hover:bg-primary/90 hover:scale-105 text-primary-foreground font-semibold text-lg px-8 transition-transform duration-300 ease-out">
-                🍴 Menu
+              <Button size="lg" className="flex h-12 px-8 items-center justify-center rounded-lg bg-primary hover:bg-red-700 text-white text-base font-bold shadow-lg transition-transform hover:scale-105">
+                🍴 Ver Menu
               </Button>
-              <Button size="lg" variant="outline" className="bg-white hover:bg-white/90 hover:scale-105 text-foreground font-semibold text-lg px-8 border-none transition-transform duration-300 ease-out">
-                🛵 Pedir Delivery
+              <Button size="lg" variant="outline" className="flex h-12 px-8 items-center justify-center rounded-lg bg-white/10 hover:bg-white/20 backdrop-blur-sm border-2 border-white text-white text-base font-bold transition-transform hover:scale-105">
+                📍 Ubicacion
               </Button>
             </div>
           </div>
@@ -57,18 +57,18 @@ export default function HomePage() {
               {/* Left Column: Welcome Text & Badge */}
               <div className="space-y-6">
                 <div>
-                  <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+                  <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4 text-center">
                     Welcome to {"Jay's"}
                   </h2>
-                  <p className="text-lg text-muted-foreground leading-relaxed mb-6">
-                    Desde 2017, servimos el mejor desayuno americano en Buenos Aires.
-                    Nuestros platillos están preparados con ingredientes frescos y mucho amor,
-                    siguiendo las recetas tradicionales de los diners clásicos de Estados Unidos.
+                  <p className="text-lg text-muted-foreground leading-relaxed mb-6 text-center">
+                    Con productos de primera calidad y recetas propias emulamos la clásica cocina 
+                    norteamericana, centrándonos en el desayuno pero sin dejar de lado las clásicas 
+                    hamburguesas, pollo frito, ensaladas y sandwiches.
                   </p>
-                  <p className="text-lg text-muted-foreground leading-relaxed">
-                    Ya sea que vengas por nuestros famosos pancakes, un hearty breakfast o
-                    simplemente un buen café, en {"Jay's"} encontrarás la experiencia auténtica
-                    que estás buscando.
+                  <p className="text-lg text-muted-foreground leading-relaxed text-center">
+                    Ponemos lo mejor en cada plato para que nuestros clientes estén a gusto 
+                    y se sientan en la típica cafetería de New York, pero en Buenos Aires. 
+                    Vení a pasar un buen rato y a disfrutar de nuestros platos.
                   </p>
                 </div>
 

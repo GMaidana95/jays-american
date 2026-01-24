@@ -12,7 +12,7 @@ export default function MenuPage() {
         <div className="container mx-auto px-4 py-8 md:py-12 max-w-6xl">
           
           {/* Menu Header */}
-          <div className="text-center mb-8 md:mb-12">
+          <div className="text-center bg-background/95 backdrop-blur-sm rounded-lg shadow-2xl border border-primary/10 p-4 md:p-6">
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-4 text-balance">
               Menú de Salón - Take Away
             </h1>
@@ -24,13 +24,6 @@ export default function MenuPage() {
           {/* Menu Image Viewer */}
           <div className="bg-background/95 backdrop-blur-sm rounded-lg shadow-2xl border border-primary/10 p-4 md:p-6">
             <MenuViewer />
-          </div>
-
-          {/* Additional Info */}
-          <div className="mt-8 text-center">
-            <p className="text-sm text-muted-foreground leading-relaxed max-w-xl mx-auto">
-              Usá los controles de zoom para ver mejor el menú. En mobile, podés hacer pinch-to-zoom para ampliar los detalles.
-            </p>
           </div>
 
         </div>

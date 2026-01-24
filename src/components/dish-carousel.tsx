@@ -10,7 +10,7 @@ interface Dish {
 const dishes: Dish[] = [
     {
         id: 1,
-        name: 'Classic Pancakes',
+        name: 'Pancakes',
         description: 'Esponjosos pancakes dorados con manteca derretida, jarabe de maple y frutas frescas',
         image: '/pancakes.jpg',
     },
@@ -22,9 +22,9 @@ const dishes: Dish[] = [
     },
     {
         id: 3,
-        name: 'Eggs Benedict',
-        description: 'Huevos pochados perfectos con tocino canadiense y salsa holandesa sobre muffin inglés',
-        image: '/eggs-benedict.jpg',
+        name: 'Hash Browns',
+        description: 'Papas ralladas y fritas hasta quedar doradas y crujientes, servidas con tocino y huevos',
+        image: '/hash-browns.jpg',
     },
 ]
 
